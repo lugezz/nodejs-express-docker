@@ -1,0 +1,14 @@
+
+services:
+  express-app:
+    build:
+      context: .
+      args:
+        - NODE_ENV=development
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=development
+    # Override the default command so that the container doesn't exit
+    command: npm run dev

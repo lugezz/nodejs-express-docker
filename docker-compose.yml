@@ -1,0 +1,10 @@
+# It shares both enviroment (dev and prod) and dockerfile. Don't include the port if it is different
+services:
+  express-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    environment:
+      - PORT=3000
