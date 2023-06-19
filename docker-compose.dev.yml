@@ -5,6 +5,8 @@ services:
       context: .
       args:
         - NODE_ENV=development
+    env_file:
+      - ./.env
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -16,3 +18,7 @@ services:
   nginx:
     ports:
       - "3000:80"
+
+  mongo:
+    env_file:
+     - ./.mongo.env
