@@ -12,3 +12,7 @@ services:
       - NODE_ENV=development
     # Override the default command so that the container doesn't exit
     command: npm run dev
+
+  nginx:
+    ports:
+      - "3000:80"

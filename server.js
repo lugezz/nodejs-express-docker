@@ -2,13 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { MONGO_USER, MONGO_PASSWORD, MONGO_IP, MONGO_PORT, REDIS_PORT,
     REDIS_URL, SESSION_SECRET} = require('./config/config');
-const session = require('express-session');
-const redis = require('redis');
-const RedisStore = require("connect-redis").default
-let redisClient = redis.createClient({
-    host: REDIS_URL,
-    port: REDIS_PORT
-});
+const cors = require('cors');
+
+// Redis
+const RedisStore = require("connect-redis").default;
+const session = require("express-session");
+const {createClient} = require("redis")
 
 // Routes
 const postRouter = require('./routes/postRoutes');
@@ -33,21 +32,37 @@ const connectWithRetry = () => {
 
 connectWithRetry();
 
-app.use(session({
-    store: new RedisStore({ client: redisClient }),
-    secret: SESSION_SECRET,
-    cookie: {
-        secure: false,
-        resave: false,
-        saveUninitialized: false,
-        httpOnly: true,
-        maxAge: 60000*60*24
+app.enable("trust proxy");
+app.use(cors({}));
+
+// Redis ------
+// Initialize client.
+let redisClient = createClient({socket: {
+        host: REDIS_URL,
+        port: REDIS_PORT,
     }
-}));
+})
+redisClient.connect().catch(console.error)
+
+// Initialize store.
+let redisStore = new RedisStore({
+  client: redisClient,
+  prefix: "myapp:",
+})
+
+// Initialize sesssion storage.
+app.use(
+  session({
+    store: redisStore,
+    resave: false, // required: force lightweight session keep alive (touch)
+    saveUninitialized: false, // recommended: only save session when data exists
+    secret: SESSION_SECRET,
+  })
+)
 
 app.use(express.json());
     
-app.get('/', (req, res) => {
+app.get('/api/v1', (req, res) => {
     res.send('<h2>Hello world from a Server - Updated!! Ey che!!!</h2>');
     }
 );
