@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: lugezz/node-api-app
     depends_on:
       - mongo
 
